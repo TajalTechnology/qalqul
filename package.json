@@ -34,6 +34,7 @@
         "jsonwebtoken": "^8.5.1",
         "lodash": "^4.17.21",
         "mongoose": "^6.2.1",
+        "redis": "^4.6.5",
         "rimraf": "^3.0.2",
         "sequelize-query": "^1.0.4",
         "swagger-jsdoc": "^6.2.5",

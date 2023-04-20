@@ -1,11 +1,10 @@
 import validation from "../common/middlewares/validation";
 import { NextFunction, Request, Response, Express } from "express";
 import { ErrorHttpResponse } from "../common/services/error/errorHttpResponse";
-import { Comments } from "../repository/comment.repository";
 import { LikeInput } from "../validations/like.validation";
 import ArticleModel from "../models/article.model";
-import { Like } from "../models/like.model";
 import { Likes } from "../repository/like.repository";
+import UserModel from "../models/user.model";
 
 /* try-catch handle */
 const tryCatch =
@@ -25,7 +24,20 @@ export const createLike = (req: any, res: any) => {
     return new Likes()
         .createLike(req)
         .then(async (like: any) => {
+            // increate like dislike denoralize column in Articles model
             if (like.like) {
+                // update users
+                await UserModel.findByIdAndUpdate(
+                    like.userId,
+                    {
+                        $push: { likeIds: like.articleId },
+                    },
+                    {
+                        new: true,
+                        useFindAndModify: false,
+                    }
+                );
+
                 await ArticleModel.findByIdAndUpdate(
                     req.params.articleId,
                     { $inc: { like: 1 } },

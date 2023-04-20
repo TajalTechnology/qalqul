@@ -53,6 +53,26 @@
                 }
             }
         },
+        "/api/users/{id}": {
+            "get": {
+                "summary": "Details of a user",
+                "description": "When user hit api/users/:_id request, then show details with users activity",
+                "tags": ["Users"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true
+                    }
+                ]
+            }
+        },
         "/api/categories": {
             "post": {
                 "tags": ["Categories"],

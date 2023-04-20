@@ -5,6 +5,7 @@ export interface UserInput {
     email: string;
     username: string;
     password: string;
+    likeIds: string;
 }
 
 export interface UserDocument extends UserInput, mongoose.Document {
@@ -17,6 +18,12 @@ export const userSchema: Schema = new Schema(
         email: { type: Types.String },
         username: { type: Types.String },
         password: { type: Types.String },
+        likeIds: [
+            {
+                type: Types.ObjectId,
+                ref: "Articles",
+            },
+        ],
     },
     {
         timestamps: true,
@@ -30,7 +37,9 @@ export default UserModel;
 
 export class User {
     public static getModelById(id: Schema.Types.ObjectId, include?: any) {
-        return UserModel.findById(id);
+        return UserModel.findById(id)
+            .populate("likeIds", ["title", "content"])
+            .exec();
     }
 
     public static getModel(query: any) {

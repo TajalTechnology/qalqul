@@ -11,6 +11,7 @@ const tryCatch =
 /* all routes */
 module.exports = function (router: Express) {
     router.post("/users", validation(userInput), tryCatch(createUser));
+    router.get("/users/:id", tryCatch(getUser));
 };
 
 export const createUser = (req: any, res: any) => {
@@ -27,6 +28,24 @@ export const createUser = (req: any, res: any) => {
             res.status(400).send({
                 success: false,
                 message: "Job creation failed.",
+            });
+        });
+};
+
+export const getUser = (req: any, res: any) => {
+    return new Users()
+        .getUser(req)
+        .then((job: any) => {
+            res.status(200).send({
+                success: true,
+                message: "User fetch succeeded.",
+                data: job,
+            });
+        })
+        .catch((errors: any) => {
+            res.status(400).send({
+                success: false,
+                message: "User fetch failed.",
             });
         });
 };
