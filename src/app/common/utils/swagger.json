@@ -1,0 +1,276 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Backend api-v1",
+        "description": "Write description here",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "email": "mdtajalislam1189@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.11"
+    },
+    "externalDocs": {
+        "description": "Find out more about how Swagger document is ?",
+        "url": "http://swagger.io"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:4000/"
+        }
+    ],
+    "paths": {
+        "/api/users": {
+            "post": {
+                "tags": ["Users"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/categories": {
+            "post": {
+                "tags": ["Categories"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Categories"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Categories"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Categories"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/articles": {
+            "post": {
+                "tags": ["Articles"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Articles"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Articles"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Articles"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "A simple list of articles",
+                "description": "When user hit api/articles request, they show all articles",
+                "tags": ["Articles"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "parameters": []
+            }
+        },
+        "/api/articles/{id}": {
+            "get": {
+                "summary": "Details of a article",
+                "description": "When user hit api/article/:_id request, then show details of specfic article details",
+                "tags": ["Articles"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/api/articles/{articleId}/comments": {
+            "post": {
+                "tags": ["Comments"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Comments"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Comments"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Comments"
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "articleId",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Users": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "required": true,
+                        "example": "mdtajalislam1189@gmail.com"
+                    },
+                    "username": {
+                        "type": "string",
+                        "required": true,
+                        "example": "tajalislam"
+                    },
+                    "password": {
+                        "type": "string",
+                        "required": true,
+                        "example": "Aa123123"
+                    }
+                }
+            },
+            "Categories": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "required": true,
+                        "example": "food"
+                    }
+                }
+            },
+            "Articles": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "required": true,
+                        "example": "This is title of this article"
+                    },
+                    "content": {
+                        "type": "string",
+                        "required": true,
+                        "example": "Write description here"
+                    },
+                    "tag": {
+                        "type": "string",
+                        "required": true,
+                        "enum": ["tranding", "new", "technology"],
+                        "example": "tranding"
+                    },
+                    "categoryId": {
+                        "type": "string",
+                        "required": true,
+                        "example": "643f5638c98880b65f379d23"
+                    },
+                    "userId": {
+                        "type": "string",
+                        "required": true,
+                        "example": "643f565a49b1bd4bb909046f"
+                    }
+                }
+            },
+            "Comments": {
+                "type": "object",
+                "properties": {
+                    "comment": {
+                        "type": "string",
+                        "required": true,
+                        "example": "This is comment"
+                    },
+                    "userId": {
+                        "type": "string",
+                        "required": true,
+                        "example": "643f565a49b1bd4bb909046f"
+                    }
+                }
+            }
+        },
+        "requestBodies": {},
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "name": "Authorization",
+                "scheme": "bearer",
+                "in": "header",
+                "description": "JWT Authorization header"
+            }
+        }
+    }
+}

@@ -1,0 +1,70 @@
+import mongoose, { Schema } from "mongoose";
+const { Types } = Schema;
+
+export interface UserInput {
+    email: string;
+    username: string;
+    password: string;
+}
+
+export interface UserDocument extends UserInput, mongoose.Document {
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export const userSchema: Schema = new Schema(
+    {
+        email: { type: Types.String },
+        username: { type: Types.String },
+        password: { type: Types.String },
+    },
+    {
+        timestamps: true,
+        strict: true,
+    }
+);
+
+const UserModel = mongoose.model<UserDocument>("Users", userSchema);
+
+export default UserModel;
+
+export class User {
+    public static getModelById(id: Schema.Types.ObjectId, include?: any) {
+        return UserModel.findById(id);
+    }
+
+    public static getModel(query: any) {
+        if (Array.isArray(query)) {
+            return UserModel.aggregate(query);
+        } else {
+            return UserModel.findOne(query);
+        }
+    }
+
+    public static getModelCollection(query: any) {
+        if (Array.isArray(query)) {
+            return UserModel.aggregate(query);
+        } else {
+            return UserModel.find(query);
+        }
+    }
+
+    public static createModel(data: any, transaction?: any) {
+        const userSchema = new UserModel(data);
+        return userSchema.save();
+    }
+
+    public static updateModel(
+        id: Schema.Types.ObjectId,
+        data: any,
+        transaction?: any
+    ) {
+        return UserModel.findByIdAndUpdate(id, data, {
+            new: true,
+        });
+    }
+
+    public static deleteModel(id: Schema.Types.ObjectId, transaction?: any) {
+        return UserModel.findByIdAndRemove(id);
+    }
+}
