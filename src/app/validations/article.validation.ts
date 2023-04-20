@@ -12,8 +12,6 @@ const articlePayload = {
         tag: z.enum(["tranding", "new", "technology"]),
         categoryId: z.string(),
         userId: z.string(),
-        like: z.number(),
-        dislike: z.number(),
     }),
 };
 

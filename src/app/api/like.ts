@@ -25,7 +25,7 @@ export const createLike = (req: any, res: any) => {
     return new Likes()
         .createLike(req)
         .then(async (like: any) => {
-            if (like) {
+            if (like.like) {
                 await ArticleModel.findByIdAndUpdate(
                     req.params.articleId,
                     { $inc: { like: 1 } },
@@ -33,7 +33,7 @@ export const createLike = (req: any, res: any) => {
                         new: true,
                     }
                 );
-            } else if (!like) {
+            } else if (!like.dislike) {
                 await ArticleModel.findByIdAndUpdate(
                     req.params.articleId,
                     { $inc: { dislike: 1 } },
