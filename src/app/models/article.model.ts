@@ -8,6 +8,8 @@ export interface UserInput {
     categoryId: string;
     userId: string;
     commentIds: string;
+    like: number;
+    dislike: number;
 }
 
 export interface ArticleDocument extends UserInput, mongoose.Document {
@@ -32,6 +34,8 @@ export const articleSchema: Schema = new Schema(
         ],
         categoryId: { type: Types.ObjectId, ref: "Categories" },
         userId: { type: Types.ObjectId, ref: "Users" },
+        like: { type: Types.Number, default: 0 },
+        dislike: { type: Types.Number, default: 0 },
     },
     {
         timestamps: true,

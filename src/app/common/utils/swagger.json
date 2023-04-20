@@ -181,6 +181,43 @@
                     }
                 ]
             }
+        },
+        "/api/articles/{articleId}/likes": {
+            "post": {
+                "tags": ["Likes"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Likes"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Likes"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Likes"
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "articleId",
+                        "required": true
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -253,6 +290,21 @@
                         "type": "string",
                         "required": true,
                         "example": "This is comment"
+                    },
+                    "userId": {
+                        "type": "string",
+                        "required": true,
+                        "example": "643f565a49b1bd4bb909046f"
+                    }
+                }
+            },
+            "Likes": {
+                "type": "object",
+                "properties": {
+                    "like": {
+                        "type": "boolean",
+                        "required": true,
+                        "example": true
                     },
                     "userId": {
                         "type": "string",
