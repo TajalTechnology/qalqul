@@ -20,6 +20,7 @@
     },
     "homepage": "https://github.com/TajalTechnology/dynamic-form#readme",
     "dependencies": {
+        "@elastic/elasticsearch": "^8.7.0",
         "@jest/transform": "^27.5.1",
         "@types/dotenv-safe": "^8.1.2",
         "bcrypt": "^5.0.1",

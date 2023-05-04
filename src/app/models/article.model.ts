@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { esClient } from "../common/services/elSearch/esSearch";
 const { Types } = Schema;
 
 export interface UserInput {
@@ -43,8 +44,41 @@ export const articleSchema: Schema = new Schema(
     }
 );
 
-const ArticleModel = mongoose.model<ArticleDocument>("Articles", articleSchema);
+const articleMapping = {
+    properties: {
+        title: { type: "text" },
+        content: { type: "text" },
+        tag: { type: "keyword" },
+        commentIds: { type: "keyword" },
+        categoryId: { type: "keyword" },
+        userId: { type: "keyword" },
+        like: { type: "integer" },
+        dislike: { type: "integer" },
+        createdAt: { type: "date" },
+        updatedAt: { type: "date" },
+    },
+};
 
+// Create the index and define the mapping
+esClient.indices.create(
+    {
+        index: "articles",
+        body: {
+            mappings: {
+                properties: articleMapping,
+            },
+        },
+    },
+    (error: any, response: any) => {
+        if (error) {
+            console.error(error);
+        } else {
+            console.log(response);
+        }
+    }
+);
+
+const ArticleModel = mongoose.model<ArticleDocument>("Articles", articleSchema);
 export default ArticleModel;
 
 export class Article {

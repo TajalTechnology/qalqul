@@ -5,6 +5,7 @@ import { NextFunction, Request, Response, Express } from "express";
 import { ErrorHttpResponse } from "../common/services/error/errorHttpResponse";
 import { RedisService } from "../common/services/redis/redis";
 import { REDIS_CONSTANTS } from "../common/services/redis/redis.constants";
+import { esClient } from "../common/services/elSearch/esSearch";
 
 /* try-catch handle */
 const tryCatch =
@@ -38,6 +39,7 @@ export const createArticle = (req: any, res: any) => {
 };
 
 export const getArticles = async (req: any, res: any) => {
+    console.log(await searchArticles());
     const cacheArticles = await new RedisService().getData("articles");
 
     if (cacheArticles) {
@@ -91,3 +93,23 @@ export const getArticle = async (req: any, res: any) => {
             });
         });
 };
+
+async function searchArticles() {
+    try {
+        const response = await esClient.search({
+            index: "articles",
+            body: {
+                query: {
+                    multi_match: {
+                        query: "This is title of this article",
+                        fields: ["title^3", "content"],
+                    },
+                },
+            },
+        });
+        return response.body.hits.hits;
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
