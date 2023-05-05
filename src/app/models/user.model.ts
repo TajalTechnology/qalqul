@@ -15,7 +15,7 @@ export interface UserDocument extends UserInput, mongoose.Document {
 
 export const userSchema: Schema = new Schema(
     {
-        email: { type: Types.String },
+        email: { type: Types.String, unique: true },
         username: { type: Types.String },
         password: { type: Types.String },
         likeIds: [
@@ -58,19 +58,28 @@ export class User {
         }
     }
 
-    public static createModel(data: any, transaction?: any) {
+    public static async createModel(data: any, transaction?: any) {
         const userSchema = new UserModel(data);
-        return userSchema.save();
+        const existingUser = await UserModel.findOne({
+            email: data.email,
+        });
+        if (!existingUser) return userSchema.save();
+        else return false;
     }
 
-    public static updateModel(
+    public static async updateModel(
         id: Schema.Types.ObjectId,
         data: any,
         transaction?: any
     ) {
-        return UserModel.findByIdAndUpdate(id, data, {
-            new: true,
+        const existingUser = await UserModel.findOne({
+            email: data.email,
         });
+        if (!existingUser) {
+            return UserModel.findByIdAndUpdate(id, data, {
+                new: true,
+            });
+        } else return false;
     }
 
     public static deleteModel(id: Schema.Types.ObjectId, transaction?: any) {
