@@ -5,6 +5,7 @@ import { NextFunction, Request, Response, Express } from "express";
 import { ErrorHttpResponse } from "../common/services/error/errorHttpResponse";
 import { RedisService } from "../common/services/redis/redis";
 import { REDIS_CONSTANTS } from "../common/services/redis/redis.constants";
+import { esClient } from "../common/services/elSearch/esSearch";
 
 /* try-catch handle */
 const tryCatch =
@@ -21,7 +22,15 @@ module.exports = function (router: Express) {
 export const createArticle = (req: any, res: any) => {
     return new Articles()
         .createArticle(req)
-        .then((article: any) => {
+        .then(async (article: any) => {
+            // set in elastic search
+            const { _id, title, content, tag } = article;
+            await esClient.index({
+                index: "articles",
+                id: _id.toString(),
+                body: { title, content, tag },
+            });
+
             res.status(200).send({
                 success: true,
                 message: "Article creation succeeded.",
@@ -38,39 +47,56 @@ export const createArticle = (req: any, res: any) => {
 };
 
 export const getArticles = async (req: any, res: any) => {
-    const cacheArticles = await new RedisService().getData("articles");
+    const { category, tag } = req.query;
+    let articles = JSON.parse(await new RedisService().getData("articles2"));
 
-    if (cacheArticles) {
-        return res.status(200).send({
-            success: true,
-            message: "Articles fetch succeeded.",
-            data: JSON.parse(cacheArticles),
-        });
+    /**
+     * Filter from redis cache based on tag/category queryString.
+     */
+    if (category) {
+        articles = articles.filter(
+            (article: any) => article.category === category
+        );
+    }
+    if (tag) articles = articles.filter((article: any) => article.tag === tag);
+
+    if (articles.length < 1) {
+        /**
+         * Search from database if no data available in redis.
+         */
+        if (!category && !tag) {
+            articles = await new Articles().getArticles(req);
+        } else {
+            const searchParams = {
+                index: "articles",
+                body: {
+                    query: {
+                        bool: {
+                            must: [],
+                        },
+                    },
+                },
+            };
+            if (category) {
+                searchParams.body.query.bool.must.push({
+                    match: { category },
+                });
+            }
+            if (tag) {
+                searchParams.body.query.bool.must.push({
+                    match: { tag },
+                });
+            }
+            const searchResults = await esClient.search(searchParams);
+            articles = searchResults.hits.hits.map((hit: any) => hit._source);
+        }
     }
 
-    return new Articles()
-        .getArticles(req)
-        .then(async (articles: any) => {
-            await new RedisService().set(
-                "articles",
-                JSON.stringify(articles),
-                REDIS_CONSTANTS.REDIS.MODE.EX,
-                REDIS_CONSTANTS.REDIS.MODE.REDIS_DURATION
-            );
-
-            res.status(200).send({
-                success: true,
-                message: "Articles fetch succeeded.",
-                data: articles,
-            });
-        })
-        .catch((errors: any) => {
-            res.status(400).send({
-                success: false,
-                message: "Articles fetch failed.",
-                errors: new ErrorHttpResponse(errors).generate(),
-            });
-        });
+    res.status(200).send({
+        success: true,
+        message: "Articles fetch succeeded.",
+        data: articles,
+    });
 };
 
 export const getArticle = async (req: any, res: any) => {

@@ -29,4 +29,8 @@ export class Users {
     public deleteUser(req: any) {
         return db.User.deleteModel(req.params);
     }
+
+    public login(req: any) {
+        return db.User.login(req?.body);
+    }
 }

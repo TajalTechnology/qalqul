@@ -53,6 +53,31 @@
                 }
             }
         },
+        "/api/login": {
+            "post": {
+                "tags": ["Users"],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/{id}": {
             "get": {
                 "summary": "Details of a user",
@@ -71,8 +96,44 @@
                         "required": true
                     }
                 ]
+            },
+            "put": {
+                "tags": ["Users"],
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true
+                    }
+                ]
             }
         },
+
         "/api/categories": {
             "post": {
                 "tags": ["Categories"],
@@ -142,7 +203,19 @@
                     }
                 ],
                 "responses": {},
-                "parameters": []
+                "parameters": [
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "description": "add tag query string for search",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["tranding", "new", "technology"]
+                        }
+                    }
+                ]
             }
         },
         "/api/articles/{id}": {

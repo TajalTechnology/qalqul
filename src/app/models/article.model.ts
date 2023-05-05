@@ -1,5 +1,13 @@
 import mongoose, { Schema } from "mongoose";
+import { esClient } from "../common/services/elSearch/esSearch";
 const { Types } = Schema;
+
+import { Client } from "@elastic/elasticsearch";
+
+// create an ElasticSearch client instance
+const elasticClient = new Client({
+    node: "http://localhost:9200",
+});
 
 export interface UserInput {
     title: string;
@@ -44,7 +52,6 @@ export const articleSchema: Schema = new Schema(
 );
 
 const ArticleModel = mongoose.model<ArticleDocument>("Articles", articleSchema);
-
 export default ArticleModel;
 
 export class Article {
