@@ -4,6 +4,9 @@ import { userInput } from "../validations/user.validation";
 import { NextFunction, Request, Response, Express } from "express";
 import { esClient } from "../common/services/elSearch/esSearch";
 import { ErrorHttpResponse } from "../common/services/error/errorHttpResponse";
+import { Articles } from "../repository/article.repository";
+import { RedisService } from "../common/services/redis/redis";
+import { REDIS_CONSTANTS } from "../common/services/redis/redis.constants";
 
 /* try-catch handle */
 const tryCatch =
@@ -15,6 +18,7 @@ module.exports = function (router: Express) {
     router.post("/users", validation(userInput), tryCatch(createUser));
     router.put("/users/:id", tryCatch(updateUser));
     router.get("/users/:id", tryCatch(getUser));
+    router.post("/login", tryCatch(login));
 };
 
 export const createUser = (req: any, res: any) => {
@@ -105,6 +109,38 @@ export const getUser = (req: any, res: any) => {
             res.status(400).send({
                 success: false,
                 message: "User fetch failed.",
+            });
+        });
+};
+
+export const login = (req: any, res: any) => {
+    return new Users()
+        .login(req)
+        .then(async (login: any) => {
+            if (login) {
+                const articles = await new Articles().getArticles(req);
+                await new RedisService().set(
+                    "articles2",
+                    JSON.stringify(articles),
+                    REDIS_CONSTANTS.REDIS.MODE.EX,
+                    REDIS_CONSTANTS.REDIS.MODE.REDIS_DURATION
+                );
+
+                return res.status(200).send({
+                    success: true,
+                    message: "Login sucessful and data save in redis",
+                });
+            } else {
+                return res.status(400).send({
+                    success: false,
+                    message: "Login Failed",
+                });
+            }
+        })
+        .catch((errors: any) => {
+            return res.status(400).send({
+                success: false,
+                message: "Login creation failed.",
             });
         });
 };

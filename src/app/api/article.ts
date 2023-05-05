@@ -47,64 +47,55 @@ export const createArticle = (req: any, res: any) => {
 };
 
 export const getArticles = async (req: any, res: any) => {
-    //TODO: need to optimize and redis update
     const { category, tag } = req.query;
-    const cacheArticles = await new RedisService().getData("articles");
+    let articles = JSON.parse(await new RedisService().getData("articles2"));
 
-    let articles = JSON.parse(cacheArticles);
+    /**
+     * Filter from redis cache based on tag/category queryString.
+     */
     if (category) {
         articles = articles.filter(
             (article: any) => article.category === category
         );
     }
+    if (tag) articles = articles.filter((article: any) => article.tag === tag);
 
-    if (tag) {
-        articles = articles.filter((article: any) => article.tag === tag);
-    }
-
-    if (articles) {
-        return res.status(200).send({
-            success: true,
-            message: "Articles fetch succeeded.",
-            data: articles,
-        });
-    }
-
-    // Search in db
-    let articlesInDb;
-    if (!category && !tag) {
-        // Get all articles if no search query parameters are provided.
-        articlesInDb = await new Articles().getArticles(req);
-    } else {
-        // Search for articles in Elasticsearch.
-        const searchParams = {
-            index: "articles",
-            body: {
-                query: {
-                    bool: {
-                        must: [],
+    if (articles.length < 1) {
+        /**
+         * Search from database if no data available in redis.
+         */
+        if (!category && !tag) {
+            articles = await new Articles().getArticles(req);
+        } else {
+            const searchParams = {
+                index: "articles",
+                body: {
+                    query: {
+                        bool: {
+                            must: [],
+                        },
                     },
                 },
-            },
-        };
-        if (category) {
-            searchParams.body.query.bool.must.push({
-                match: { category },
-            });
+            };
+            if (category) {
+                searchParams.body.query.bool.must.push({
+                    match: { category },
+                });
+            }
+            if (tag) {
+                searchParams.body.query.bool.must.push({
+                    match: { tag },
+                });
+            }
+            const searchResults = await esClient.search(searchParams);
+            articles = searchResults.hits.hits.map((hit: any) => hit._source);
         }
-        if (tag) {
-            searchParams.body.query.bool.must.push({
-                match: { tag },
-            });
-        }
-        const searchResults = await esClient.search(searchParams);
-        articlesInDb = searchResults.hits.hits.map((hit: any) => hit._source);
     }
 
     res.status(200).send({
         success: true,
         message: "Articles fetch succeeded.",
-        data: articlesInDb,
+        data: articles,
     });
 };
 

@@ -85,4 +85,11 @@ export class User {
     public static deleteModel(id: Schema.Types.ObjectId, transaction?: any) {
         return UserModel.findByIdAndRemove(id);
     }
+
+    public static async login(query: any) {
+        return UserModel.findOne({
+            email: query.email,
+            password: query.password,
+        });
+    }
 }

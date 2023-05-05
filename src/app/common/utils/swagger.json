@@ -53,6 +53,31 @@
                 }
             }
         },
+        "/api/login": {
+            "post": {
+                "tags": ["Users"],
+                "responses": {},
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/xml": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/users/{id}": {
             "get": {
                 "summary": "Details of a user",
