@@ -142,7 +142,19 @@
                     }
                 ],
                 "responses": {},
-                "parameters": []
+                "parameters": [
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "description": "add tag query string for search",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["tranding", "new", "technology"]
+                        }
+                    }
+                ]
             }
         },
         "/api/articles/{id}": {

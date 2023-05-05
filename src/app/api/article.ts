@@ -22,7 +22,15 @@ module.exports = function (router: Express) {
 export const createArticle = (req: any, res: any) => {
     return new Articles()
         .createArticle(req)
-        .then((article: any) => {
+        .then(async (article: any) => {
+            // set in elastic search
+            const { _id, title, content, tag } = article;
+            await esClient.index({
+                index: "articles",
+                id: _id.toString(),
+                body: { title, content, tag },
+            });
+
             res.status(200).send({
                 success: true,
                 message: "Article creation succeeded.",
@@ -39,40 +47,65 @@ export const createArticle = (req: any, res: any) => {
 };
 
 export const getArticles = async (req: any, res: any) => {
-    console.log(await searchArticles());
+    //TODO: need to optimize and redis update
+    const { category, tag } = req.query;
     const cacheArticles = await new RedisService().getData("articles");
 
-    if (cacheArticles) {
+    let articles = JSON.parse(cacheArticles);
+    if (category) {
+        articles = articles.filter(
+            (article: any) => article.category === category
+        );
+    }
+
+    if (tag) {
+        articles = articles.filter((article: any) => article.tag === tag);
+    }
+
+    if (articles) {
         return res.status(200).send({
             success: true,
             message: "Articles fetch succeeded.",
-            data: JSON.parse(cacheArticles),
+            data: articles,
         });
     }
 
-    return new Articles()
-        .getArticles(req)
-        .then(async (articles: any) => {
-            await new RedisService().set(
-                "articles",
-                JSON.stringify(articles),
-                REDIS_CONSTANTS.REDIS.MODE.EX,
-                REDIS_CONSTANTS.REDIS.MODE.REDIS_DURATION
-            );
+    // Search in db
+    let articlesInDb;
+    if (!category && !tag) {
+        // Get all articles if no search query parameters are provided.
+        articlesInDb = await new Articles().getArticles(req);
+    } else {
+        // Search for articles in Elasticsearch.
+        const searchParams = {
+            index: "articles",
+            body: {
+                query: {
+                    bool: {
+                        must: [],
+                    },
+                },
+            },
+        };
+        if (category) {
+            searchParams.body.query.bool.must.push({
+                match: { category },
+            });
+        }
+        if (tag) {
+            searchParams.body.query.bool.must.push({
+                match: { tag },
+            });
+        }
+        const searchResults = await esClient.search(searchParams);
+        articlesInDb = searchResults.hits.hits.map((hit: any) => hit._source);
+    }
 
-            res.status(200).send({
-                success: true,
-                message: "Articles fetch succeeded.",
-                data: articles,
-            });
-        })
-        .catch((errors: any) => {
-            res.status(400).send({
-                success: false,
-                message: "Articles fetch failed.",
-                errors: new ErrorHttpResponse(errors).generate(),
-            });
-        });
+    res.status(200).send({
+        success: true,
+        message: "Articles fetch succeeded.",
+        data: articlesInDb,
+    });
 };
 
 export const getArticle = async (req: any, res: any) => {
@@ -93,23 +126,3 @@ export const getArticle = async (req: any, res: any) => {
             });
         });
 };
-
-async function searchArticles() {
-    try {
-        const response = await esClient.search({
-            index: "articles",
-            body: {
-                query: {
-                    multi_match: {
-                        query: "This is title of this article",
-                        fields: ["title^3", "content"],
-                    },
-                },
-            },
-        });
-        return response.body.hits.hits;
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
-}

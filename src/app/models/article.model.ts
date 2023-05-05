@@ -2,6 +2,13 @@ import mongoose, { Schema } from "mongoose";
 import { esClient } from "../common/services/elSearch/esSearch";
 const { Types } = Schema;
 
+import { Client } from "@elastic/elasticsearch";
+
+// create an ElasticSearch client instance
+const elasticClient = new Client({
+    node: "http://localhost:9200",
+});
+
 export interface UserInput {
     title: string;
     content: string;
@@ -41,40 +48,6 @@ export const articleSchema: Schema = new Schema(
     {
         timestamps: true,
         strict: true,
-    }
-);
-
-const articleMapping = {
-    properties: {
-        title: { type: "text" },
-        content: { type: "text" },
-        tag: { type: "keyword" },
-        commentIds: { type: "keyword" },
-        categoryId: { type: "keyword" },
-        userId: { type: "keyword" },
-        like: { type: "integer" },
-        dislike: { type: "integer" },
-        createdAt: { type: "date" },
-        updatedAt: { type: "date" },
-    },
-};
-
-// Create the index and define the mapping
-esClient.indices.create(
-    {
-        index: "articles",
-        body: {
-            mappings: {
-                properties: articleMapping,
-            },
-        },
-    },
-    (error: any, response: any) => {
-        if (error) {
-            console.error(error);
-        } else {
-            console.log(response);
-        }
     }
 );
 
