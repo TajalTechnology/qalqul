@@ -7,4 +7,5 @@
 
 ## Database desing
 
-![QALQUL-engine-db](https://user-images.githubusercontent.com/42303062/236537938-96cb5e0a-984d-4267-bc26-7a4b02810ee8.jpg)
+
+![QALQUL-engine-db drawio (1)](https://user-images.githubusercontent.com/42303062/236540540-a4fbae1e-7417-4b15-8aa1-41466440d3a5.png)
