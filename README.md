@@ -7,4 +7,4 @@
 
 ## Database desing
 
-![Alt text](/Users/mdtajalislam/Documents/assesment/Qalqul/QALQUL-engine-db.jpg)
+![QALQUL-engine-db](https://user-images.githubusercontent.com/42303062/236537938-96cb5e0a-984d-4267-bc26-7a4b02810ee8.jpg)
