@@ -4,7 +4,6 @@ import { ArticleInput } from "../validations/article.validation";
 import { NextFunction, Request, Response, Express } from "express";
 import { ErrorHttpResponse } from "../common/services/error/errorHttpResponse";
 import { RedisService } from "../common/services/redis/redis";
-import { REDIS_CONSTANTS } from "../common/services/redis/redis.constants";
 import { esClient } from "../common/services/elSearch/esSearch";
 
 /* try-catch handle */
@@ -24,11 +23,11 @@ export const createArticle = (req: any, res: any) => {
         .createArticle(req)
         .then(async (article: any) => {
             // set in elastic search
-            const { _id, title, content, tag } = article;
+            const { _id, title, content, category, tag } = article;
             await esClient.index({
                 index: "articles",
                 id: _id.toString(),
-                body: { title, content, tag },
+                body: { title, content, category, tag },
             });
 
             res.status(200).send({
@@ -49,50 +48,46 @@ export const createArticle = (req: any, res: any) => {
 export const getArticles = async (req: any, res: any) => {
     const { category, tag } = req.query;
     let articles = JSON.parse(await new RedisService().getData("articles2"));
-
-    /**
-     * Filter from redis cache based on tag/category queryString.
-     */
-    if (category) {
-        articles = articles.filter(
-            (article: any) => article.category === category
-        );
-    }
-    if (tag) articles = articles.filter((article: any) => article.tag === tag);
-
-    if (articles.length < 1) {
+    if (articles) {
+        /**
+         * Filter from redis cache based on tag/category queryString.
+         */
+        if (category) {
+            articles = articles.filter(
+                (article: any) => article.category === category
+            );
+        }
+        if (tag)
+            articles = articles.filter((article: any) => article.tag === tag);
+    } else {
         /**
          * Search from database if no data available in redis.
          */
-        if (!category && !tag) {
-            articles = await new Articles().getArticles(req);
-        } else {
-            const searchParams = {
-                index: "articles",
-                body: {
-                    query: {
-                        bool: {
-                            must: [],
-                        },
+        const searchParams = {
+            index: "articles",
+            body: {
+                query: {
+                    bool: {
+                        must: [],
                     },
                 },
-            };
-            if (category) {
-                searchParams.body.query.bool.must.push({
-                    match: { category },
-                });
-            }
-            if (tag) {
-                searchParams.body.query.bool.must.push({
-                    match: { tag },
-                });
-            }
-            const searchResults = await esClient.search(searchParams);
-            articles = searchResults.hits.hits.map((hit: any) => hit._source);
+            },
+        };
+        if (category) {
+            searchParams.body.query.bool.must.push({
+                match: { category },
+            });
         }
+        if (tag) {
+            searchParams.body.query.bool.must.push({
+                match: { tag },
+            });
+        }
+        const searchResults = await esClient.search(searchParams);
+        articles = searchResults.hits.hits.map((hit: any) => hit._source);
     }
 
-    res.status(200).send({
+    return res.status(200).send({
         success: true,
         message: "Articles fetch succeeded.",
         data: articles,

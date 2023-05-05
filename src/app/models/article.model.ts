@@ -40,7 +40,11 @@ export const articleSchema: Schema = new Schema(
                 ref: "Comments",
             },
         ],
-        categoryId: { type: Types.ObjectId, ref: "Categories" },
+        category: {
+            type: Types.String,
+            enum: Object.values(["category1", "category2", "category3"]),
+            required: true,
+        },
         userId: { type: Types.ObjectId, ref: "Users" },
         like: { type: Types.Number, default: 0 },
         dislike: { type: Types.Number, default: 0 },
@@ -57,7 +61,6 @@ export default ArticleModel;
 export class Article {
     public static getModelById(id: Schema.Types.ObjectId, include?: any) {
         return ArticleModel.findById(id)
-            .populate("categoryId", ["name"])
             .populate("commentIds", ["comment"])
             .populate("userId", ["email", "username"])
             .exec();

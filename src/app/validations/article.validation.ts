@@ -10,7 +10,7 @@ const articlePayload = {
             .string()
             .min(18, { message: "Must be 18 or more characters long" }),
         tag: z.enum(["tranding", "new", "technology"]),
-        categoryId: z.string(),
+        category: z.enum(["category1", "category1", "category1"]),
         userId: z.string(),
     }),
 };
